@@ -21,6 +21,7 @@ group :test do
   gem 'factory_girl_rails'
   gem 'rspec-rails', '~> 3.5'
   gem 'ffaker'
+  gem 'shoulda-matchers', '~> 3.0'
 end
 
 group :development do
