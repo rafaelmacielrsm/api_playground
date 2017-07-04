@@ -11,15 +11,16 @@ gem 'sass-rails', '~> 5.0'
 gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.2'
 gem 'active_model_serializers', '~> 0.10.0'
+gem 'devise'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
 end
 
 group :test do
-    gem 'rspec-rails', '~> 3.5'
-    gem 'factory_girl'
-    gem 'ffaker'
+  gem 'factory_girl_rails'
+  gem 'rspec-rails', '~> 3.5'
+  gem 'ffaker'
 end
 
 group :development do
