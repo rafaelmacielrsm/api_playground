@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe Api::V1::UsersController, type: :controller do
   let(:parsed_response) { JSON.parse(response.body, symbolize_names: true) }
   let(:user) { FactoryGirl.create :user }
+  let(:dbl_user) { double(User) }
 
   before { request.headers['Accept'] = "application/vnd.marketplace.v1" }
 
@@ -84,5 +85,20 @@ RSpec.describe Api::V1::UsersController, type: :controller do
 
       it { expect(parsed_response[:errors][:email].to_s).to match(/invalid/) }
     end
+  end
+
+  describe 'DELETE #destroy' do
+    let(:stub_deletion_methods) {
+      allow( User ).to receive(:find).and_return( dbl_user )
+      allow( dbl_user ).to receive(:destroy).and_return true
+    }
+
+    before {
+      stub_deletion_methods
+      delete :destroy, params: { id: 'Any ID' }, format: :json
+    }
+
+    it { expect(response).to have_http_status :no_content }
+    it { expect( dbl_user ).to have_received( :destroy ).with(no_args) }
   end
 end
