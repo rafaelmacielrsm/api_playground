@@ -2,12 +2,11 @@ require 'rails_helper'
 
 RSpec.describe Api::V1::UsersController, type: :controller do
   let(:parsed_response) { JSON.parse(response.body, symbolize_names: true) }
+  let(:user) { FactoryGirl.create :user }
 
   before { request.headers['Accept'] = "application/vnd.marketplace.v1" }
 
   describe 'GET #show' do
-    let!(:user) { FactoryGirl.create :user }
-
     context 'when a valid user id is provided' do
       before {get :show, params: { id: user.id}, format: :json }
 
@@ -50,9 +49,40 @@ RSpec.describe Api::V1::UsersController, type: :controller do
 
       it { expect(parsed_response).to include(:errors) }
 
-      it 'errors hash should include :email' do
+      it 'should include :email in the errors hash' do
         expect(parsed_response[:errors]).to include(:email)
       end
+    end
+  end
+
+  describe 'PUT/PATCH #update' do
+    before do
+      patch :update, format: :json,  params: { id: user.id, user: {
+        email: new_user_email } }
+    end
+
+    context "when is successfully updated" do
+      let(:new_user_email) { FFaker::Internet.email }
+
+      it { expect(response).to have_http_status(:ok) }
+
+      it 'should have the recently changed email in the response' do
+        expect(parsed_response[:email]).to eql new_user_email
+      end
+    end
+
+    context 'when the updade is unsuccessful' do
+      let(:new_user_email) { 'example.com' }
+
+      it { expect(response).to have_http_status :unprocessable_entity }
+
+      it { expect(parsed_response).to have_key(:errors) }
+
+      it 'should have :email in the errors hash' do
+        expect(parsed_response[:errors]).to include(:email)
+      end
+
+      it { expect(parsed_response[:errors][:email].to_s).to match(/invalid/) }
     end
   end
 end
