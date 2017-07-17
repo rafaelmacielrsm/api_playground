@@ -8,14 +8,14 @@ class Api::V1::UsersController < ApplicationController
     user = User.new(user_params)
     if user.save
       render(
-          json: user,
-          status: :created,
-          location: [:api, user]
+        json: user,
+        status: :created,
+        location: [:api, user]
       )
     else
       render(
-          json: {errors: user.errors}.to_json,
-          status: :unprocessable_entity
+        json: {errors: user.errors}.to_json,
+        status: :unprocessable_entity
       )
     end
   end
