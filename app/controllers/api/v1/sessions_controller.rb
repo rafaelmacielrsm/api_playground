@@ -15,4 +15,11 @@ class Api::V1::SessionsController < ApplicationController
         status: :unprocessable_entity
     end
   end
+
+  def destroy
+    user = User.find(params[:id])
+    user.generate_authentication_token!
+    user.save
+    head :no_content
+  end
 end
