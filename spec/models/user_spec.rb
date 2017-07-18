@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-  subject { FactoryGirl.build(:userx) }
+  subject { FactoryGirl.build(:user) }
 
   it { expect(subject).to respond_to(:email) }
   it { expect(subject).to respond_to(:password) }
@@ -37,6 +37,6 @@ RSpec.describe User, type: :model do
         expect( subject.auth_token ).to eql("AUniqueToken123")
       end
     end
-    
+
   end
 end
