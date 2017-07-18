@@ -11,7 +11,8 @@
 # a separate helper file that requires the additional dependencies and performs
 # the additional setup, and require it from the spec files that actually need
 # it.
-#
+#    confirmed_at Date.today
+
 # The `.rspec` file also contains a few flags that are not defaults but that
 # users commonly want.
 #
@@ -22,7 +23,7 @@ RSpec.configure do |config|
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.
   config.include Request::JsonHelpers, type: :controller
-  config.include Request::HeaderHelpers, type: :controller  
+  config.include Request::HeaderHelpers, type: :controller
   config.expect_with :rspec do |expectations|
     # This option will default to `true` in RSpec 4. It makes the `description`
     # and `failure_message` of custom matchers include text for helper methods

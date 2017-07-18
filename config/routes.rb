@@ -1,6 +1,6 @@
 require 'api_constraints'
 Rails.application.routes.draw do
-  # devise_for :users
+  devise_for :users
   # Api Definition
   namespace :api,
             defaults: { format: :json },
@@ -9,6 +9,7 @@ Rails.application.routes.draw do
     scope module: :v1,
           constraints: ApiConstraints.new(version: 1, default: true) do
       resources :users, only: [:show, :create, :update, :destroy]
+      resources :sessions, only: [:create]
     end
   end
 
