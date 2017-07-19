@@ -7,6 +7,12 @@ end
 describe Authenticable do
   let(:authentication) { Authentication.new }
   let(:user) { FactoryGirl.create :user }
+  let(:stub_existing_current_user){
+    allow(authentication).to receive(:current_user).and_return(user)
+  }
+  let(:stub_non_existing_current_user){
+    allow(authentication).to receive(:current_user).and_return(nil)
+  }
 
   describe '#current_user' do
     before do
@@ -24,7 +30,7 @@ describe Authenticable do
 
     context "when the current user exists" do
       before do
-        allow(authentication).to receive(:current_user).and_return(user)
+        stub_existing_current_user
         authentication.authenticate_with_token!
       end
 
@@ -35,13 +41,25 @@ describe Authenticable do
 
     context "when the current user doesn't exist" do
       before do
-        allow(authentication).to receive(:current_user).and_return(nil)
+        stub_non_existing_current_user
         authentication.authenticate_with_token!
       end
 
       it 'should receive a render message' do
         expect(authentication).to have_received(:render)
       end
+    end
+  end
+  describe '#user_signed_in?' do
+    context "when there is a user on 'session'" do
+      before{ stub_existing_current_user }
+
+      it { expect(authentication).to be_user_signed_in }
+    end
+    context "when there is no user on 'session'" do
+      before{ stub_non_existing_current_user }
+
+      it { expect(authentication).not_to be_user_signed_in }
     end
   end
 end
