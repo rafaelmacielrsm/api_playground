@@ -10,6 +10,15 @@ RSpec.describe User, type: :model do
 
   it { expect(subject).to be_valid }
 
+  context 'associations' do
+    it { expect(subject).to have_many(:products) }
+
+    it 'should destroy associated products on destroy' do
+      3.times{FactoryGirl.create :product, user: subject}
+      expect{ subject.destroy }.to change{ subject.products.length }.from(3).to(0)
+    end
+  end
+
   context 'Validations' do
     #email validations
     it { expect(subject).to validate_presence_of(:email) }

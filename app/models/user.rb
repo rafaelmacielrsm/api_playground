@@ -2,6 +2,9 @@ class User < ApplicationRecord
   # callbacks
   before_create :generate_authentication_token!
 
+  # Associations
+  has_many :products, dependent: :destroy
+
   #model validations
   validates :auth_token, uniqueness: true
 
