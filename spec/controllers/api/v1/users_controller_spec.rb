@@ -51,6 +51,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
 
   describe 'PUT/PATCH #update' do
     before do
+      api_authorization_header(user.auth_token)
       patch :update,  params: { id: user.id, user: { email: new_user_email } }
     end
 
@@ -81,16 +82,23 @@ RSpec.describe Api::V1::UsersController, type: :controller do
 
   describe 'DELETE #destroy' do
     let(:stub_deletion_methods) {
-      allow( User ).to receive(:find).and_return( dbl_user )
+      allow( subject ).to receive(:current_user).and_return( dbl_user )
       allow( dbl_user ).to receive(:destroy).and_return true
     }
 
     before {
+      api_authorization_header(user.auth_token)
       stub_deletion_methods
-      delete :destroy, params: { id: 'Any ID' }
+      delete :destroy, params: { id: user.id }
     }
 
     it { expect(response).to have_http_status :no_content }
+
+    it {
+      expect(subject).to have_received(:current_user)
+        .with(no_args).at_least(1).times
+    }
+
     it { expect( dbl_user ).to have_received( :destroy ).with(no_args) }
   end
 end
