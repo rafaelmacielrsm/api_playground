@@ -7,12 +7,12 @@ module Request
 
   module HeaderHelpers
     def api_header(version = 1)
-      request.headers['Accept'] = "application/vnd.marketplace.v#{version}"
+      request.headers['Accept'] = "application/vnd.api+json; version=#{version}"
     end
 
     def api_response_format(format = Mime[:json])
       request.headers['Accept'] = "#{request.headers['Accept']}, #{format}"
-      request.headers['Content-Type'] = format.to_s
+      request.headers['Content-Type'] = "application/vnd.api+json"
     end
 
     def api_authorization_header(token)

@@ -6,6 +6,6 @@ class ApiConstraints
 
   def matches?(request)
     @default || request.headers['Accept'].
-      include?("application/vnd.marketplace.v#{@version}")
+      include?("application/vnd.api+json; version=#{@version}")
   end
 end
