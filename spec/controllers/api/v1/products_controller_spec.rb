@@ -1,4 +1,9 @@
 require 'rails_helper'
+require 'shared_examples/an_api_show_action'
+require 'shared_examples/an_api_create_action'
+require 'shared_examples/an_api_update_action'
+require 'shared_examples/not_findable'
+require 'shared_examples/authorizable_action'
 
 RSpec.describe Api::V1::ProductsController, type: :controller do
   let(:product_response) { json_response }
@@ -9,15 +14,17 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
   before{ include_default_accept_headers }
 
   describe 'GET #show' do
-    let(:product) { FactoryGirl.create(:product) }
+    let(:send_request) { get :show, params: { id: record.id} }
 
-    before{ get :show, params: {id: product.id} }
+    before { send_request }
 
-    it { expect(response).to have_http_status(:ok) }
-    it { expect(product_response).to include(:title) }
+    include_examples 'an api show action' do
+      let(:record) { product }
+      let(:checked_attr_symbol) { :title }
+    end
 
-    it "should return the json representation of the record" do
-      expect(product_response[:title]).to eql(product.title)
+    it_behaves_like 'not findable' do
+      let(:send_request) { get :show, params: { id: product.id + rand(1000)} }
     end
   end
 
@@ -28,81 +35,56 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
     end
 
     it { expect(response).to have_http_status(:ok) }
-    it { expect(product_response).to have(4).items }
+    it { expect(response_data).to have(4).items }
   end
 
   describe 'POST #create' do
-    let(:product_attributes) { FactoryGirl.attributes_for(:product) }
+    let(:set_auth_token_header) { api_authorization_header(user.auth_token) }
 
-    before { api_authorization_header(user.auth_token) }
-
-    context 'when is successfully created' do
-      before do
-        post :create, params: {user_id: user.id, product: product_attributes}
-      end
-
-      it { expect(response).to have_http_status(:created) }
-      it { expect(product_response).to include(:title) }
-      it 'should return the json representation of the record created' do
-        expect(product_response[:title]).to eq(product_attributes[:title])
-      end
+    before do
+      set_auth_token_header
+      post :create, params: {user_id: user.id, product: record_attr}
     end
 
-    context 'when is not successfully created' do
-      before do
-        product_attributes[:price] = "invalid value"
-        post :create, params: {user_id: user.id, product: product_attributes}
-      end
+    include_examples 'an api create action' do
+      let(:record_attr) { FactoryGirl.attributes_for(:product, user: user) }
+      let(:record_attr_with_errs) {
+        FactoryGirl.attributes_for(:product, title: "")}
+      let(:checked_attr_symbol){ :title }
+      let(:expect_error_message){ /can't be blank/ }
+    end
 
-      it{ expect(response).to have_http_status(:unprocessable_entity) }
-
-      it "should include :price in the errors hash" do
-        expect(product_response[:errors]).to include(:price)
-      end
+    it_behaves_like 'an authorizable action' do
+      let(:set_auth_token_header) { api_authorization_header("invalid token") }
     end
   end
 
   describe 'PUT/PATCH #update' do
-    let(:new_name) { FFaker::Product.product_name }
-    let(:update_request) do
-      patch :update, params: {user_id: user.id, id: product.id,
-        product: {title: new_name}}
-    end
-    let(:update_request_with_param_error) do
-      patch :update, params: {user_id: user.id, id: product.id,
-        product: {price: "new_name"}}
-    end
+    let(:send_request) { patch :update, params: {
+      user_id: user.id, id: product.id, product: record_attr } }
+    let(:set_auth_token_header) { api_authorization_header(user.auth_token) }
 
-    context 'when is successfully updated' do
-      before { api_authorization_header(user.auth_token) }
-
-      it do
-        update_request
-        expect(response).to have_http_status(:ok)
-      end
-
-      it "should change the product attributes" do
-        expect {update_request}.to change{product.reload.title}.to(new_name)
-      end
+    before do
+      set_auth_token_header
+      send_request
     end
 
-    context "when isn't successfully update" do
-      before do
-        api_authorization_header(user.auth_token)
-        update_request_with_param_error
-      end
-
-      it { expect(response).to have_http_status(:unprocessable_entity) }
-      it { expect(product_response).to have_key(:errors) }
+    include_examples 'an api update action' do
+      let(:record) { product }
+      let(:record_attr) { FactoryGirl.attributes_for :product }
+      let(:record_attr_with_errs) { FactoryGirl.attributes_for :product,
+        title: ""}
+      let(:checked_attr_symbol){ :title }
+      let(:expect_error_message) { /blank/ }
     end
 
-    context "when the request doesn't have a valid token" do
-      before do
-        api_authorization_header(invalid_token)
-        update_request
-      end
+    it_behaves_like 'not findable' do
+      let(:send_request) { patch :update, params: {
+        user_id: user.id, id: product.id + rand(1000), product: record_attr } }
+    end
 
-      it { expect(response).to have_http_status(:unauthorized) }
+    it_behaves_like 'an authorizable action' do
+      let(:set_auth_token_header) { api_authorization_header("invalid token") }
     end
   end
 

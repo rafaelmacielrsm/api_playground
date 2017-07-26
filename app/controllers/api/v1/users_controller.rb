@@ -2,8 +2,14 @@ class Api::V1::UsersController < ApplicationController
   before_action :authenticate_with_token!, only: [:update, :destroy]
   respond_to :json
 
+
   def show
-    respond_with( User.find(params[:id]) )
+    user = User.find_by_id(params[:id])
+    if user
+      render json: user, status: :ok, location: [:api, user]
+    else
+      render json: "null", status: :not_found
+    end
   end
 
   def create
@@ -23,7 +29,10 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def update
-    user = current_user
+    user = User.find_by_id(params[:id])
+    unless current_user && current_user.eql?(user)
+      return render json: "null", status: :not_found
+    end
     if user.update_attributes(user_params)
       render  json: user,
               status: :ok,

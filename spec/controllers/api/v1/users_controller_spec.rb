@@ -1,4 +1,8 @@
 require 'rails_helper'
+require 'shared_examples/an_api_show_action'
+require 'shared_examples/an_api_create_action'
+require 'shared_examples/an_api_update_action'
+require 'shared_examples/not_findable'
 
 RSpec.describe Api::V1::UsersController, type: :controller do
   let(:user) { FactoryGirl.create :user }
@@ -7,76 +11,52 @@ RSpec.describe Api::V1::UsersController, type: :controller do
   before { include_default_accept_headers }
 
   describe 'GET #show' do
-    context 'when a valid user id is provided' do
-      before {get :show, params: { id: user.id} }
+    let(:send_request) { get :show, params: { id: record.id} }
 
-      it {expect(response).to have_http_status(:ok) }
-      it 'response should include :email' do
-        expect(json_response).to include(:email)
-      end
+    before { send_request }
+
+    include_examples 'an api show action' do
+      let(:record) { user }
+      let(:checked_attr_symbol){ :email }
+    end
+
+    it_behaves_like 'not findable' do
+      let(:send_request) { get :show, params: { id: user.id + rand(1000)} }
     end
   end
 
   describe 'POST #create' do
-    context 'when is successfully created' do
-      let!(:user_attributes) { FactoryGirl.attributes_for :user }
+    before { post :create, params: { user: record_attr } }
 
-      before{ post :create, params: { user: user_attributes }}
-
-      it { expect(response).to have_http_status(:created) }
-
-      it 'response should include :email' do
-        expect(json_response).to include(:email)
-      end
-
-      it 'response should have the json representation of the created record' do
-        expect( json_response[:email] ).to eq( user_attributes[:email] )
-      end
-    end
-
-    context 'when is not created' do
-      let!(:user_attributes) { FactoryGirl.attributes_for :user, email: ''}
-
-      before{ post :create, params: { user: user_attributes } }
-
-      it { expect(response).to have_http_status(:unprocessable_entity) }
-
-      it { expect(json_response).to include(:errors) }
-
-      it 'should include :email in the errors hash' do
-        expect(json_response[:errors]).to include(:email)
-      end
+    include_examples "an api create action" do
+      let(:record_attr) { FactoryGirl.attributes_for :user }
+      let(:record_attr_with_errs) { FactoryGirl.attributes_for :user, email: ''}
+      let(:checked_attr_symbol){ :email }
+      let(:expect_error_message){ /can't be blank/ }
     end
   end
 
   describe 'PUT/PATCH #update' do
+    let(:send_request) {
+      patch :update, params: { id: record.id, user: record_attr } }
+
     before do
       api_authorization_header(user.auth_token)
-      patch :update,  params: { id: user.id, user: { email: new_user_email } }
+      send_request
     end
 
-    context "when is successfully updated" do
-      let(:new_user_email) { FFaker::Internet.email }
-
-      it { expect(response).to have_http_status(:ok) }
-
-      it 'should have the recently changed email in the response' do
-        expect(json_response[:email]).to eql new_user_email
-      end
+    include_examples "an api update action" do
+      let(:record) { user }
+      let(:record_attr) { FactoryGirl.attributes_for :user }
+      let(:record_attr_with_errs) { FactoryGirl.attributes_for :user,
+        email: 'example.com'}
+      let(:checked_attr_symbol){ :email }
+      let(:expect_error_message) { /invalid/ }
     end
 
-    context 'when the updade is unsuccessful' do
-      let(:new_user_email) { 'example.com' }
-
-      it { expect(response).to have_http_status :unprocessable_entity }
-
-      it { expect(json_response).to have_key(:errors) }
-
-      it 'should have :email in the errors hash' do
-        expect(json_response[:errors]).to include(:email)
-      end
-
-      it { expect(json_response[:errors][:email].to_s).to match(/invalid/) }
+    it_behaves_like 'not findable' do
+      let(:send_request) {
+        patch :update, params: { id: user.id + rand(1000), user: record_attr }}
     end
   end
 

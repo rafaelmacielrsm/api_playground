@@ -3,7 +3,12 @@ class Api::V1::ProductsController < ApplicationController
   respond_to :json
 
   def show
-    respond_with( Product.find(params[:id]) )
+    product = Product.find_by_id(params[:id])
+    if product
+      render json: product, status: :ok, location: [:api, product]
+    else
+      render json: "null", status: :not_found
+    end
   end
 
   def index
@@ -21,7 +26,10 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def update
-    product = current_user.products.find(params[:id])
+    product = current_user.products.find_by_id(params[:id])
+
+    return render json: "null", status: :not_found unless product
+
     if product.update_attributes(product_params)
       render json: product, status: :ok, location: [:api, product]
     else

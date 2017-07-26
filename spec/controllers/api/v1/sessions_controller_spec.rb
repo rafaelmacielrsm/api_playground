@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Api::V1::SessionsController, type: :controller do
   let(:user) { FactoryGirl.create :user, password: '12345678' }
+  before { include_default_accept_headers }
   describe 'POST #create' do
 
     before { post :create, params: { session: credentials } }
@@ -13,7 +14,7 @@ RSpec.describe Api::V1::SessionsController, type: :controller do
 
       it 'should return the record corresponding to the given credentials' do
         user.reload
-        expect( json_response[:auth_token] ).to eql(user.auth_token)
+        expect( response_attributes[:"auth-token"] ).to eql(user.auth_token)
       end
     end
 

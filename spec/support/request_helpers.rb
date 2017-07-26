@@ -3,6 +3,14 @@ module Request
     def json_response
       @json_response ||= JSON.parse(response.body, symbolize_names: true)
     end
+
+    def response_attributes
+      json_response[:data][:attributes]
+    end
+
+    def response_data
+      json_response[:data]
+    end
   end
 
   module HeaderHelpers
@@ -11,7 +19,7 @@ module Request
     end
 
     def api_response_format(format = Mime[:json])
-      request.headers['Accept'] = "#{request.headers['Accept']}, #{format}"
+      request.headers['Accept'] = "#{request.headers['Accept']}"
       request.headers['Content-Type'] = "application/vnd.api+json"
     end
 
