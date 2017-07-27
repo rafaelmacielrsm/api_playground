@@ -15,6 +15,14 @@ RSpec.describe Api::V1::UsersController, type: :controller do
 
     before { send_request }
 
+    it 'should have the product ids as an embeded object' do
+      expect(response_relationships).to include(:products)
+    end
+
+    it 'should return an empty array in products ids field' do
+      expect(response_relationships[:products][:data]).to eq []
+    end
+
     include_examples 'an api show action' do
       let(:record) { user }
       let(:checked_attr_symbol){ :email }

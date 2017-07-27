@@ -11,6 +11,10 @@ module Request
     def response_data
       json_response[:data]
     end
+
+    def response_relationships
+      json_response[:data][:relationships]
+    end
   end
 
   module HeaderHelpers

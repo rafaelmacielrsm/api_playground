@@ -18,6 +18,10 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
 
     before { send_request }
 
+    it 'should have the user as an embeded object' do
+      expect(response_relationships).to include(:user)
+    end
+
     include_examples 'an api show action' do
       let(:record) { product }
       let(:checked_attr_symbol) { :title }
@@ -29,13 +33,36 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
   end
 
   describe 'GET #index' do
-    before do
-      4.times { FactoryGirl.create :product }
-      get :index
+    before { 4.times { FactoryGirl.create :product } }
+
+    context "when no product_ids param is received" do
+      before { get :index }
+
+      it { expect(response).to have_http_status(:ok) }
+      it "should return all products" do
+        expect(response_data).to have(4).items
+      end
+      it { expect(response_data).to all(include(:relationships))}
     end
 
-    it { expect(response).to have_http_status(:ok) }
-    it { expect(response_data).to have(4).items }
+    context "when there is the product_ids param" do
+      let(:new_user) { FactoryGirl.create :user }
+      let(:mapped_data) { response_data.map { |each|
+        each[:relationships][:user][:data][:id] } }
+
+      before do
+        3.times { FactoryGirl.create :product, user: new_user }
+        get :index, params: {product_ids: new_user.product_ids}
+      end
+
+      it 'should return only the products that belong to the user' do
+        expect(response_data).to have(3).items
+      end
+
+      it 'should belong to the same user' do 
+        expect(mapped_data).to all(eql new_user.id.to_s)
+      end
+    end
   end
 
   describe 'POST #create' do

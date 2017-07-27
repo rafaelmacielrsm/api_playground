@@ -12,7 +12,12 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def index
-    respond_with Product.all
+    if params[:product_ids].present?
+      products = Product.find(params[:product_ids])
+    else
+      products = Product.all
+    end
+    respond_with products
   end
 
   def create
