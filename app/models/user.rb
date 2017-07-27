@@ -4,6 +4,7 @@ class User < ApplicationRecord
 
   # Associations
   has_many :products, dependent: :destroy
+  has_many :orders, dependent: :destroy
 
   #model validations
   validates :auth_token, uniqueness: true

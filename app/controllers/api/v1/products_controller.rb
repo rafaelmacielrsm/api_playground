@@ -1,14 +1,11 @@
 class Api::V1::ProductsController < ApplicationController
+  include JsonApiHelper
+
   before_action :authenticate_with_token!, only: [:create, :update, :destroy]
   respond_to :json
 
   def show
-    product = Product.find_by_id(params[:id])
-    if product
-      render json: product, status: :ok, location: [:api, product]
-    else
-      render json: "null", status: :not_found
-    end
+    json_api_show
   end
 
   def index

@@ -24,7 +24,6 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
 
     include_examples 'an api show action' do
       let(:record) { product }
-      let(:checked_attr_symbol) { :title }
     end
 
     it_behaves_like 'not findable' do
@@ -59,7 +58,7 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
         expect(response_data).to have(3).items
       end
 
-      it 'should belong to the same user' do 
+      it 'should belong to the same user' do
         expect(mapped_data).to all(eql new_user.id.to_s)
       end
     end
