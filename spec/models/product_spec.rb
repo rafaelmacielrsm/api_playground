@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe Product, type: :model do
-  subject { FactoryGirl.build :product }
 
   it { expect(subject).to respond_to(:title) }
   it { expect(subject).to respond_to(:price) }
@@ -19,6 +18,7 @@ RSpec.describe Product, type: :model do
 
   context 'associations' do
     it { expect(subject).to belong_to(:user) }
+    it { is_expected.to have_many(:orders).through(:placements) }
   end
 
   describe ".filter_by_title" do
