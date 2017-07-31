@@ -14,12 +14,7 @@ class Api::V1::ProductsController < ApplicationController
 
   def create
     product = current_user.products.build(product_params)
-    if product.save
-      render json: product, status: :created, location: [:api, product]
-    else
-      render( json: {errors: product.errors }.to_json,
-              status: :unprocessable_entity)
-    end
+    json_api_create(product)
   end
 
   def update

@@ -9,5 +9,14 @@ module JsonApiHelper
        render json: "null", status: :not_found
      end
    end
+
+   def json_api_create(built_object)
+     if built_object.save
+       render json: built_object, status: :created
+     else
+       render( json: {errors: built_object.errors }.to_json,
+               status: :unprocessable_entity)
+     end
+   end
  end
 end
