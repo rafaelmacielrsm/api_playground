@@ -43,6 +43,13 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
         expect(response_data).to have(4).items
       end
       it { expect(response_data).to all(include(:relationships))}
+
+      it { expect(json_response).to have_key(:meta) }
+      it { expect(response_meta).to have_key(:pagination) }
+      it { expect(response_meta[:pagination]).to have_key(:"per-page") }
+      it { expect(response_meta[:pagination]).to have_key(:"total-page") }
+      it { expect(response_meta[:pagination]).to have_key(:"total-objects") } 
+
     end
 
     context "when there is the product_ids param" do

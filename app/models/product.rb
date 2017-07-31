@@ -27,7 +27,7 @@ class Product < ApplicationRecord
 
   def self.search(params = {})
     if params[:product_ids].present?
-      products = Product.find(params[:product_ids])
+      products = Product.where(id: params[:product_ids])
     else
       products = Product.all
     end
