@@ -8,6 +8,7 @@ class Order < ApplicationRecord
 
   # Validations
   validates :user_id, presence: true
+  validates_with EnoughProductsValidator
 
   def set_total!
     self.total = self.products.map(&:price).sum

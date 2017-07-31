@@ -34,4 +34,22 @@ RSpec.describe Order, type: :model do
         product_quantity_array) }.to change{ subject.placements.length }.by(2)
     end
   end
+
+  describe "#valid?" do
+    before do
+      product1 = FactoryGirl.create :product, price: 100, quantity: 5
+      product2 = FactoryGirl.create :product, price: 85, quantity: 10
+
+      placement1 = FactoryGirl.build :placement, product: product1, quantity: 3
+      placement2 = FactoryGirl.build :placement, product: product2, quantity: 15
+
+      @order = FactoryGirl.build :order
+      @order.placements << placement1
+      @order.placements << placement2
+    end
+
+    it 'should be invalid due to insufficient products' do
+      expect( @order ).not_to be_valid
+    end
+  end
 end
