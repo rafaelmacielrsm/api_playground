@@ -25,6 +25,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
 
     include_examples 'an api show action' do
       let(:record) { user }
+      let(:checked_attr_symbol) { :email }
     end
 
     it_behaves_like 'not findable' do

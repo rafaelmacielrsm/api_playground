@@ -24,6 +24,7 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
 
     include_examples 'an api show action' do
       let(:record) { product }
+      let(:checked_attr_symbol) { :title }
     end
 
     it_behaves_like 'not findable' do
