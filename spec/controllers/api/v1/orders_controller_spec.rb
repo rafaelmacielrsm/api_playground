@@ -33,8 +33,6 @@ RSpec.describe Api::V1::OrdersController, type: :controller do
 
     before { get :show, params: {user_id: current_user.id, id: order.id} }
 
-    it { expect(json_response).to include(:luls) }
-
     include_examples 'an api show action' do
       let(:record) { order }
       let(:checked_attr_symbol) { :total }
