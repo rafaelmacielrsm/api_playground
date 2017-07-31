@@ -46,15 +46,20 @@ RSpec.describe Api::V1::OrdersController, type: :controller do
   describe 'POST #create' do
     let(:product1) { FactoryGirl.create :product }
     let(:product2) { FactoryGirl.create :product }
-    let(:order_params) { {  product_ids: [product1.id, product2.id] } }
+    let(:order_params) { {
+      product_ids_and_quantities: [[product1.id, 2], [product2.id, 3]]
+    } }
 
     before do
       post :create, params: {user_id: current_user.id, order: order_params }
     end
 
+
     it { expect(response).to have_http_status :created }
 
     it { expect(json_response).to include(:data) }
+
+    it { expect(response_relationships[:products][:data]).to have(2).items }
 
     it_behaves_like 'an authorizable action' do
       let(:set_auth_token_header) { api_authorization_header("invalid token") }
