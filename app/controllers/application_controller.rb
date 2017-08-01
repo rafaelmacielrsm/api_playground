@@ -11,6 +11,12 @@ class ApplicationController < ActionController::Base
 
 
   protected
+  def pagination(paginated_array, per_page)
+    { pagination: {   per_page: per_page.to_i,
+                      total_page: paginated_array.total_pages,
+                      total_objects: paginated_array.count }}
+  end
+
   def check_json_api_headers
     unless request.headers["Content-Type"] && request.headers["Content-Type"].
       include?("application/vnd.api+json")

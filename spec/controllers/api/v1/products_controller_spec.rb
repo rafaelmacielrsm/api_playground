@@ -4,6 +4,7 @@ require 'shared_examples/an_api_create_action'
 require 'shared_examples/an_api_update_action'
 require 'shared_examples/not_findable'
 require 'shared_examples/authorizable_action'
+require 'shared_examples/an_paginated_list'
 
 RSpec.describe Api::V1::ProductsController, type: :controller do
   let(:product_response) { json_response }
@@ -34,22 +35,17 @@ RSpec.describe Api::V1::ProductsController, type: :controller do
 
   describe 'GET #index' do
     before { 4.times { FactoryGirl.create :product } }
-
     context "when no product_ids param is received" do
       before { get :index }
 
       it { expect(response).to have_http_status(:ok) }
+      it { expect(response_data).to all(include(:relationships))}
+
       it "should return all products" do
         expect(response_data).to have(4).items
       end
-      it { expect(response_data).to all(include(:relationships))}
 
-      it { expect(json_response).to have_key(:meta) }
-      it { expect(response_meta).to have_key(:pagination) }
-      it { expect(response_meta[:pagination]).to have_key(:"per-page") }
-      it { expect(response_meta[:pagination]).to have_key(:"total-page") }
-      it { expect(response_meta[:pagination]).to have_key(:"total-objects") } 
-
+      include_examples "an paginated list"
     end
 
     context "when there is the product_ids param" do

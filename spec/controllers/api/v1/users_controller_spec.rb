@@ -64,7 +64,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
 
     it_behaves_like 'not findable' do
       let(:send_request) {
-        patch :update, params: { id: user.id + rand(1000), user: record_attr }}
+        patch :update, params: { id: user.id + rand(1..10), user: record_attr }}
     end
   end
 

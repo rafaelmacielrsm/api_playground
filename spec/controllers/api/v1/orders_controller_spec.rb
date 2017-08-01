@@ -1,6 +1,7 @@
 require 'rails_helper'
 require 'shared_examples/authorizable_action'
 require 'shared_examples/an_api_show_action'
+require 'shared_examples/an_paginated_list'
 
 
 RSpec.describe Api::V1::OrdersController, type: :controller do
@@ -23,6 +24,8 @@ RSpec.describe Api::V1::OrdersController, type: :controller do
     it { expect(response).to have_http_status(:ok) }
     it { expect(response_data).to have(4).items }
 
+    include_examples "an paginated list"
+
     it_behaves_like 'an authorizable action' do
       let(:set_auth_token_header) { api_authorization_header("invalid token") }
     end
@@ -44,8 +47,8 @@ RSpec.describe Api::V1::OrdersController, type: :controller do
   end
 
   describe 'POST #create' do
-    let(:product1) { FactoryGirl.create :product }
-    let(:product2) { FactoryGirl.create :product }
+    let(:product1) { FactoryGirl.create :product, quantity: 10 }
+    let(:product2) { FactoryGirl.create :product, quantity: 10 }
     let(:order_params) { {
       product_ids_and_quantities: [[product1.id, 2], [product2.id, 3]]
     } }
